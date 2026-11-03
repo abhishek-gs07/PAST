@@ -1,0 +1,22 @@
+.message {
+  padding: 0.5em 0.75em;
+  border-radius: 0.75em;
+  margin: 0.4em;
+  max-width: 70%;
+  white-space: pre-line;
+}
+#chat-container {
+  display: flex;
+  flex-direction: column; /*to separate whose message goes which side by making columns*/
+  padding: 0.5em;
+}
+
+.past {
+  align-self: flex-start; /* which wall it stands on is align self */
+  background-color: #e5e5ea;
+}
+
+.user {
+  align-self: flex-end;
+  background-color: #dcf8c6;
+}
