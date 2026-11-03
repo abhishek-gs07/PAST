@@ -150,3 +150,10 @@ vite.config.ts.timestamp-*
 
 
 documentation.md
+.env
+.env.*
+serviceAccountKey.json
+*service-account*.json
+.firebase/
+firebase-debug.log
+node_modules/

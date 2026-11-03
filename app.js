@@ -51,11 +51,11 @@ function saveTask(rest){
             if(time==null){
               nts=true;
             }
-            if(nts==true){session="morning";}}
+            if(nts===true){session="morning";}}
             tasks.push({date:toStorageDate(date),time:time,session:session,title:title,note:null,nts:nts});
         addMessage(`Added ${title} on ${date}`,"past");}
         else{ addMessage("That doesn't look like a valid date!","past");}
-      }}
+      }};
 
 function displayMsg(){
   if(input_txt.value.trim()!==""){   // trim used for handling only space input
@@ -71,7 +71,7 @@ function displayMsg(){
       const found=getTasksForDate(toStorageDate(saving_inp));
       addMessage(formatTasks(found),"past");
     }
-    if(temp[0].toLowerCase()==("add")){
+    if(temp[0].toLowerCase()===("add")){
       saveTask(saving_inp.slice(3));
     }
   }};
