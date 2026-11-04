@@ -1,27 +1,41 @@
-const tasks = [
-  {
-    date: "2026-10-28",
-    time: "18:30",
-    session:null,
-    nts:false,
-    title: "Check papers",
-    note: ""
-  },{
-    date: "2026-10-29",
-    time: null,
-    session: "afternoon",
-    nts: false,
-    title: "exam time",
-    note: ""
-  },{
-    date: "2026-10-29",
-    time: null,
-    nts:true,
-    session: "morning",
-    title: "breakfast",
-    note: ""
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB43nVPslZ5qo7oCXQ1aYhEfxDNhfzazUI",
+  authDomain: "past-ab07.firebaseapp.com",
+  projectId: "past-ab07",
+  storageBucket: "past-ab07.firebasestorage.app",
+  messagingSenderId: "658377485498",
+  appId: "1:658377485498:web:8649d27ae6ab9043466683"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const loginBtn = document.getElementById("login-button");
+
+loginBtn.addEventListener("click", () => {
+  signInWithPopup(auth, new GoogleAuthProvider());
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    loginBtn.style.display = "none";
+    loadTasks(user.uid);
+  } else {
+    loginBtn.style.display = "block";
   }
-];
+});
+const tasks = [];
+async function loadTasks(uid){
+  const q = query(collection(db, "tasks"), where("uid", "==", uid));
+  const snap = await getDocs(q);
+  snap.forEach((d) => {
+    tasks.push(d.data());
+  });
+}
 
 const chatContainer=document.getElementById("chat-container");
 const input_txt=document.getElementById("message-input");
@@ -34,7 +48,7 @@ function addMessage(input_text, sender) {
   chatContainer.appendChild(box);
 }
 
-function saveTask(rest){
+async function saveTask(rest){
       const l_indexOfOn = rest.lastIndexOf(" on ");
       const time = findTime(rest);
       if(l_indexOfOn==-1){return addMessage("Date not found","past");}
@@ -52,8 +66,10 @@ function saveTask(rest){
               nts=true;
             }
             if(nts===true){session="morning";}}
-            tasks.push({date:toStorageDate(date),time:time,session:session,title:title,note:null,nts:nts});
-        addMessage(`Added ${title} on ${date}`,"past");}
+           const newTask = {date:toStorageDate(date),time:time,session:session,title:title,note:null,nts:nts,uid:auth.currentUser.uid};
+           tasks.push(newTask);
+           await addDoc(collection(db,"tasks"), newTask);
+            addMessage(`Added ${title} on ${date}`,"past");}
         else{ addMessage("That doesn't look like a valid date!","past");}
       }};
 
@@ -62,7 +78,6 @@ function displayMsg(){
     addMessage(input_txt.value,"user");
     const saving_inp=input_txt.value.trim();
     input_txt.value="";
-    const temp = saving_inp.split(" ");
     if(saving_inp.toLowerCase().startsWith("remind ")){ 
       let newmsg=saving_inp.slice(7);
       if(newmsg.toLowerCase().startsWith("to ")){newmsg=newmsg.slice(3);}
@@ -71,8 +86,8 @@ function displayMsg(){
       const found=getTasksForDate(toStorageDate(saving_inp));
       addMessage(formatTasks(found),"past");
     }
-    if(temp[0].toLowerCase()===("add")){
-      saveTask(saving_inp.slice(3));
+    if(saving_inp.toLowerCase().startsWith("add ")){
+      saveTask(saving_inp.slice(4));
     }
   }};
 sendBtn.addEventListener("click",displayMsg);
